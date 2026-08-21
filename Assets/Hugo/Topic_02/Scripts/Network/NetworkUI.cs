@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,14 +12,23 @@ namespace NetworkPrototype.Networking
         [SerializeField] private Button hostButton;
         [SerializeField] private Button clientButton;
         [SerializeField] private Button serverButton;
-        [SerializeField] private Text statusText;
+        [SerializeField] private TMP_Text statusText;
 
         private void Awake()
         {
             hostButton.onClick.AddListener(StartHost);
             clientButton.onClick.AddListener(StartClient);
             serverButton.onClick.AddListener(StartServer);
+
             SetStatus("Offline - escolha Host, Client ou Server");
+        }
+
+        private void Start()
+        {
+            if (NetworkManager.Singleton != null)
+            {
+                NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            }
         }
 
         private void OnDestroy()
@@ -36,6 +46,11 @@ namespace NetworkPrototype.Networking
             if (serverButton != null)
             {
                 serverButton.onClick.RemoveListener(StartServer);
+            }
+
+            if (NetworkManager.Singleton != null)
+            {
+                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
             }
         }
 
@@ -57,6 +72,7 @@ namespace NetworkPrototype.Networking
         private void StartSession(string role, Func<NetworkManager, bool> start)
         {
             NetworkManager manager = NetworkManager.Singleton;
+
             if (manager == null)
             {
                 Debug.LogError("[NetworkUI] NetworkManager.Singleton nao foi encontrado.");
@@ -71,6 +87,7 @@ namespace NetworkPrototype.Networking
             }
 
             bool started = start(manager);
+
             if (!started)
             {
                 Debug.LogError($"[NetworkUI] Nao foi possivel iniciar como {role}.");
@@ -79,8 +96,34 @@ namespace NetworkPrototype.Networking
             }
 
             SetButtonsInteractable(false);
-            SetStatus($"Executando como {role}");
+
+            if (role == "Client")
+            {
+                SetStatus("Executando como Client - aguardando o Host...");
+            }
+            else
+            {
+                SetStatus($"Executando como {role}");
+            }
+
             Debug.Log($"[NetworkUI] Sessao iniciada como {role}.");
+        }
+
+        private void OnClientConnected(ulong clientId)
+        {
+            NetworkManager manager = NetworkManager.Singleton;
+
+            if (manager == null)
+            {
+                return;
+            }
+
+            if (manager.IsClient &&
+                !manager.IsHost &&
+                clientId == manager.LocalClientId)
+            {
+                SetStatus("Executando como Client");
+            }
         }
 
         private void SetButtonsInteractable(bool interactable)
