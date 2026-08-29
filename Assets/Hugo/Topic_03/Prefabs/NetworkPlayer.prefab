@@ -114,7 +114,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4514493704291122168}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
   m_LocalPosition: {x: 0, y: -1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -384,11 +384,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPrototype.Player.PlayerLocomotionAnimator
   characterAnimator: {fileID: 385781894790990315}
-  motionSpace: {fileID: 7065456345788904137}
+  visualRoot: {fileID: 230648456458726350}
   maxGroundSpeed: 5
   parameterDampTime: 0.12
   teleportDistance: 3
-  directionDeadZone: 0.02
+  turnSpeed: 720
+  turnDeadZone: 0.02
 --- !u!1001 &4445316035869022370
 PrefabInstance:
   m_ObjectHideFlags: 0

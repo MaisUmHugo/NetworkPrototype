@@ -6,26 +6,20 @@ namespace NetworkPrototype.Player
     public sealed class PlayerLocomotionAnimator : MonoBehaviour
     {
         private static readonly int SpeedId = Animator.StringToHash("Speed");
-        private static readonly int MoveXId = Animator.StringToHash("MoveX");
-        private static readonly int MoveZId = Animator.StringToHash("MoveZ");
 
         [SerializeField] private Animator characterAnimator;
-        [SerializeField] private Transform motionSpace;
+        [SerializeField] private Transform visualRoot;
         [SerializeField, Min(0.01f)] private float maxGroundSpeed = 5f;
         [SerializeField, Min(0f)] private float parameterDampTime = 0.12f;
         [SerializeField, Min(0.01f)] private float teleportDistance = 3f;
-        [SerializeField, Min(0f)] private float directionDeadZone = 0.02f;
+        [SerializeField, Min(0f)] private float turnSpeed = 720f;
+        [SerializeField, Min(0f)] private float turnDeadZone = 0.02f;
 
         private Vector3 lastPosition;
         private bool hasMotionSample;
 
         private void Awake()
         {
-            if (motionSpace == null)
-            {
-                motionSpace = transform;
-            }
-
             if (characterAnimator != null)
             {
                 characterAnimator.applyRootMotion = false;
@@ -50,7 +44,7 @@ namespace NetworkPrototype.Player
             {
                 lastPosition = currentPosition;
                 hasMotionSample = true;
-                SetParameters(Vector2.zero, 0f);
+                SetSpeed(0f);
                 return;
             }
 
@@ -60,7 +54,7 @@ namespace NetworkPrototype.Player
 
             if (displacement.sqrMagnitude >= teleportDistance * teleportDistance)
             {
-                SetParameters(Vector2.zero, 0f);
+                SetSpeed(0f);
                 return;
             }
 
@@ -74,18 +68,16 @@ namespace NetworkPrototype.Player
             float groundSpeed = worldVelocity.magnitude;
             float normalizedSpeed = Mathf.Clamp01(groundSpeed / maxGroundSpeed);
 
-            Vector3 localVelocity = motionSpace.InverseTransformDirection(worldVelocity);
-            Vector2 localDirection = new Vector2(localVelocity.x, localVelocity.z);
-            if (localDirection.sqrMagnitude > directionDeadZone * directionDeadZone)
+            if (visualRoot != null && groundSpeed > turnDeadZone)
             {
-                localDirection.Normalize();
-            }
-            else
-            {
-                localDirection = Vector2.zero;
+                Quaternion targetRotation = Quaternion.LookRotation(worldVelocity, Vector3.up);
+                visualRoot.rotation = Quaternion.RotateTowards(
+                    visualRoot.rotation,
+                    targetRotation,
+                    turnSpeed * deltaTime);
             }
 
-            SetParameters(localDirection, normalizedSpeed);
+            SetSpeed(normalizedSpeed);
         }
 
         public void ResetMotionSample()
@@ -94,12 +86,10 @@ namespace NetworkPrototype.Player
             hasMotionSample = false;
         }
 
-        private void SetParameters(Vector2 localDirection, float normalizedSpeed)
+        private void SetSpeed(float normalizedSpeed)
         {
             float deltaTime = Time.deltaTime;
             characterAnimator.SetFloat(SpeedId, normalizedSpeed, parameterDampTime, deltaTime);
-            characterAnimator.SetFloat(MoveXId, localDirection.x, parameterDampTime, deltaTime);
-            characterAnimator.SetFloat(MoveZId, localDirection.y, parameterDampTime, deltaTime);
         }
     }
 }
