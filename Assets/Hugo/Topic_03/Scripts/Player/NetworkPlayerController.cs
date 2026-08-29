@@ -31,6 +31,7 @@ namespace NetworkPrototype.Player
         };
 
         private InputAction moveAction;
+        private bool isLocalGameplayInputBlocked;
 
         private void Awake()
         {
@@ -47,6 +48,8 @@ namespace NetworkPrototype.Player
 
         public override void OnNetworkSpawn()
         {
+            isLocalGameplayInputBlocked = false;
+
             ulong localClientId = NetworkManager != null
                 ? NetworkManager.LocalClientId
                 : ulong.MaxValue;
@@ -73,11 +76,23 @@ namespace NetworkPrototype.Player
         public override void OnNetworkDespawn()
         {
             SetInputEnabled(false);
+            isLocalGameplayInputBlocked = false;
+        }
+
+        public void SetLocalGameplayInputBlocked(bool blocked)
+        {
+            if (!IsOwner)
+            {
+                return;
+            }
+
+            isLocalGameplayInputBlocked = blocked;
+            SetInputEnabled(IsSpawned && !isLocalGameplayInputBlocked);
         }
 
         private void Update()
         {
-            if (!IsSpawned || !IsOwner)
+            if (!IsSpawned || !IsOwner || isLocalGameplayInputBlocked)
             {
                 return;
             }
