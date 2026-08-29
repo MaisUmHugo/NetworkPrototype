@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2727d53a542a4c1aa312905c3a02d807, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Editor::Unity.Netcode.Editor.Configuration.NetcodeForGameObjectsProjectSettings
-  NetworkPrefabsPath: Assets/Hugo/Topic_02/Network/DefaultNetworkPrefabs.asset
-  TempNetworkPrefabsPath: Assets/Hugo/Topic_02/Network/DefaultNetworkPrefabs.asset
+  NetworkPrefabsPath: Assets/Hugo/Topic_03/Network/DefaultNetworkPrefabs.asset
+  TempNetworkPrefabsPath: Assets/Hugo/Topic_03/Network/DefaultNetworkPrefabs.asset
   GenerateDefaultNetworkPrefabs: 1
