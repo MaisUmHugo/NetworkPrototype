@@ -7,7 +7,8 @@ namespace NetworkPrototype.Player
     [DisallowMultipleComponent]
     public sealed class NetworkPlayerController : NetworkBehaviour
     {
-        [SerializeField, Min(0f)] private float moveSpeed = 5f;
+        [SerializeField, Min(0f)] private float walkSpeed = 2.5f;
+        [SerializeField, Min(0f)] private float runSpeed = 5f;
         [SerializeField, Min(0f)] private float spawnSpacing = 2.5f;
         [SerializeField] private PlayerInput playerInput;
         [SerializeField] private CapsuleCollider capsuleCollider;
@@ -15,6 +16,7 @@ namespace NetworkPrototype.Player
         [SerializeField, Min(0f)] private float groundCheckHeight = 0.5f;
         [SerializeField, Min(0f)] private float groundCheckDistance = 2f;
         [SerializeField, Range(0.5f, 1f)] private float edgeProbeRadiusMultiplier = 0.9f;
+        [SerializeField] private Renderer[] ownerColorRenderers;
 
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         private static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -31,7 +33,11 @@ namespace NetworkPrototype.Player
         };
 
         private InputAction moveAction;
+        private InputAction sprintAction;
         private bool isLocalGameplayInputBlocked;
+
+        public float WalkSpeed => walkSpeed;
+        public float RunSpeed => runSpeed;
 
         private void Awake()
         {
@@ -108,7 +114,10 @@ namespace NetworkPrototype.Player
                 return;
             }
 
-            Vector3 targetPosition = transform.position + movement * (moveSpeed * Time.deltaTime);
+            float currentSpeed = sprintAction != null && sprintAction.IsPressed()
+                ? runSpeed
+                : walkSpeed;
+            Vector3 targetPosition = transform.position + movement * (currentSpeed * Time.deltaTime);
             if (IsPositionSupportedByGround(targetPosition))
             {
                 transform.position = targetPosition;
@@ -181,6 +190,7 @@ namespace NetworkPrototype.Player
                 }
 
                 moveAction = null;
+                sprintAction = null;
                 return;
             }
 
@@ -193,6 +203,7 @@ namespace NetworkPrototype.Player
                 }
 
                 moveAction = null;
+                sprintAction = null;
                 return;
             }
 
@@ -201,18 +212,19 @@ namespace NetworkPrototype.Player
                 Debug.LogError("[NetworkPlayerController] PlayerInput nao possui Input Actions.", this);
                 playerInput.enabled = false;
                 moveAction = null;
+                sprintAction = null;
                 return;
             }
 
             playerInput.enabled = true;
             playerInput.ActivateInput();
             moveAction = playerInput.actions.FindAction("Player/Move", true);
+            sprintAction = playerInput.actions.FindAction("Player/Sprint", true);
         }
 
         private void ApplyOwnerColor()
         {
-            Renderer playerRenderer = GetComponentInChildren<Renderer>();
-            if (playerRenderer == null)
+            if (ownerColorRenderers == null || ownerColorRenderers.Length == 0)
             {
                 return;
             }
@@ -221,10 +233,19 @@ namespace NetworkPrototype.Player
             Color color = Color.HSVToRGB(hue, 0.72f, 0.95f);
 
             var properties = new MaterialPropertyBlock();
-            playerRenderer.GetPropertyBlock(properties);
-            properties.SetColor(BaseColorId, color);
-            properties.SetColor(ColorId, color);
-            playerRenderer.SetPropertyBlock(properties);
+            foreach (Renderer colorRenderer in ownerColorRenderers)
+            {
+                if (colorRenderer == null)
+                {
+                    continue;
+                }
+
+                colorRenderer.GetPropertyBlock(properties);
+                properties.SetColor(BaseColorId, color);
+                properties.SetColor(ColorId, color);
+                colorRenderer.SetPropertyBlock(properties);
+                properties.Clear();
+            }
         }
     }
 }
