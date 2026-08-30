@@ -50,8 +50,8 @@ namespace NetworkPrototype.Player
 
         private void LateUpdate()
         {
-            // This comparison branch intentionally calculates the frequently changing
-            // locomotion floats only on the owner. NetworkAnimator distributes them.
+            // This intentionally incomplete demo calculates locomotion only on the owner.
+            // Remote instances receive movement, but no Animator parameter updates.
             if (!IsSpawned || !IsOwner || characterAnimator == null || !characterAnimator.isActiveAndEnabled)
             {
                 ResetMotionSample();
