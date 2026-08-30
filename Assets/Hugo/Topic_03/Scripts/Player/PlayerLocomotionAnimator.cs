@@ -1,9 +1,10 @@
+using Unity.Netcode;
 using UnityEngine;
 
 namespace NetworkPrototype.Player
 {
     [DisallowMultipleComponent]
-    public sealed class PlayerLocomotionAnimator : MonoBehaviour
+    public sealed class PlayerLocomotionAnimator : NetworkBehaviour
     {
         private static readonly int SpeedId = Animator.StringToHash("Speed");
         private static readonly int MoveXId = Animator.StringToHash("MoveX");
@@ -37,9 +38,21 @@ namespace NetworkPrototype.Player
             ResetMotionSample();
         }
 
+        public override void OnNetworkSpawn()
+        {
+            ResetMotionSample();
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            ResetMotionSample();
+        }
+
         private void LateUpdate()
         {
-            if (characterAnimator == null || !characterAnimator.isActiveAndEnabled)
+            // This comparison branch intentionally calculates the frequently changing
+            // locomotion floats only on the owner. NetworkAnimator distributes them.
+            if (!IsSpawned || !IsOwner || characterAnimator == null || !characterAnimator.isActiveAndEnabled)
             {
                 ResetMotionSample();
                 return;

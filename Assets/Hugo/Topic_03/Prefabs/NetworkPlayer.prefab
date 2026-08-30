@@ -139,6 +139,7 @@ GameObject:
   - component: {fileID: 3602803907581223539}
   - component: {fileID: 4415565800678754601}
   - component: {fileID: 819430419321367351}
+  - component: {fileID: 2981058310655880071}
   m_Layer: 0
   m_Name: NetworkPlayer
   m_TagString: Untagged
@@ -383,12 +384,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e1d5b772ff481f47a49e276ce4226bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPrototype.Player.PlayerLocomotionAnimator
+  ShowTopMostFoldoutHeaderGroup: 1
   characterAnimator: {fileID: 385781894790990315}
   motionSpace: {fileID: 7065456345788904137}
   maxGroundSpeed: 5
   parameterDampTime: 0.12
   teleportDistance: 3
   directionDeadZone: 0.02
+--- !u!114 &2981058310655880071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6366780609440301906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkAnimatorExpanded: 0
+  AuthorityMode: 1
+  m_Animator: {fileID: 385781894790990315}
+  TransitionStateInfoList: []
+  AnimatorParameterEntries:
+    ParameterEntries:
+    - name: Speed
+      NameHash: -823668238
+      Synchronize: 1
+      ParameterType: 1
+    - name: MoveX
+      NameHash: 675470966
+      Synchronize: 1
+      ParameterType: 1
+    - name: MoveZ
+      NameHash: -968048806
+      Synchronize: 1
+      ParameterType: 1
+  AnimatorParametersExpanded: 1
 --- !u!1001 &4445316035869022370
 PrefabInstance:
   m_ObjectHideFlags: 0
